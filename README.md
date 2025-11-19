@@ -185,10 +185,10 @@ using Platega.SDK.Models.Enums;
 public IActionResult HandleWebhook(
     [FromBody] CallbackPayload callback,
     [FromHeader(Name = "X-MerchantId")] string merchantId,
-    [FromHeader(Name = "X-Secret")] string secret) {
-
+    [FromHeader(Name = "X-Secret")] string secret
+) {
     // Verify credentials
-    if (merchantId != _expectedMerchantId || secret != _expectedSecret) {
+    if (merchantId != expectedMerchantId || secret != expectedSecret) {
         return Unauthorized();
     }
 

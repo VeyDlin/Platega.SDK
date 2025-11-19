@@ -19,7 +19,8 @@ public interface IPlategaClient {
     /// <returns>Created transaction information with payment URL.</returns>
     Task<CreateTransactionResponse> CreateTransactionAsync(
         CreateTransactionRequest request,
-        CancellationToken cancellationToken = default);
+        CancellationToken cancellationToken = default
+    );
 
     /// <summary>
     /// Gets transaction status and details.
@@ -29,7 +30,8 @@ public interface IPlategaClient {
     /// <returns>Transaction status and details.</returns>
     Task<TransactionStatusResponse> GetTransactionStatusAsync(
         Guid transactionId,
-        CancellationToken cancellationToken = default);
+        CancellationToken cancellationToken = default
+    );
 
     /// <summary>
     /// Gets exchange rate for specified payment method and currencies.
@@ -39,7 +41,8 @@ public interface IPlategaClient {
     /// <returns>Exchange rate information.</returns>
     Task<RateResponse> GetRateAsync(
         GetRateRequest request,
-        CancellationToken cancellationToken = default);
+        CancellationToken cancellationToken = default
+    );
 
     /// <summary>
     /// Gets conversion operations for specified period.
@@ -49,5 +52,6 @@ public interface IPlategaClient {
     /// <returns>Conversions response with list of operations.</returns>
     Task<ConversionsResponse> GetConversionsAsync(
         GetConversionsRequest request,
-        CancellationToken cancellationToken = default);
+        CancellationToken cancellationToken = default
+    );
 }

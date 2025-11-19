@@ -21,7 +21,8 @@ public static class ServiceCollectionExtensions {
     public static IServiceCollection AddPlategaClient(
         this IServiceCollection services,
         string merchantId,
-        string secret) {
+        string secret
+    ) {
         if (services == null) {
             throw new ArgumentNullException(nameof(services));
         }
@@ -55,7 +56,8 @@ public static class ServiceCollectionExtensions {
         this IServiceCollection services,
         string merchantId,
         string secret,
-        Action<HttpClient> configureClient) {
+        Action<HttpClient> configureClient
+    ) {
         if (services == null) {
             throw new ArgumentNullException(nameof(services));
         }

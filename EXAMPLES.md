@@ -71,8 +71,8 @@ public class PaymentController : ControllerBase {
         IPlategaClient plategaClient,
         ILogger<PaymentController> logger
     ) {
-        plategaClient = plategaClient;
-        logger = logger;
+        this.plategaClient = plategaClient;
+        this.logger = logger;
     }
 
     [HttpPost("create")]

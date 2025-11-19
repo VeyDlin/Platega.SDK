@@ -24,7 +24,11 @@ internal class PlategaHttpClient {
     /// <param name="httpClient">HTTP client instance.</param>
     /// <param name="merchantId">Merchant identifier.</param>
     /// <param name="secret">API secret key.</param>
-    public PlategaHttpClient(HttpClient httpClient, string merchantId, string secret) {
+    public PlategaHttpClient(
+        HttpClient httpClient,
+        string merchantId,
+        string secret
+    ) {
         if (httpClient == null) {
             throw new ArgumentNullException(nameof(httpClient));
         }
@@ -59,9 +63,13 @@ internal class PlategaHttpClient {
     /// <returns>Deserialized response.</returns>
     public async Task<TResponse> GetAsync<TResponse>(
         string path,
-        CancellationToken cancellationToken = default) {
+        CancellationToken cancellationToken = default
+    ) {
         var request = CreateRequest(HttpMethod.Get, path);
-        return await SendRequestAsync<TResponse>(request, cancellationToken).ConfigureAwait(false);
+        return await SendRequestAsync<TResponse>(
+            request,
+            cancellationToken
+        ).ConfigureAwait(false);
     }
 
     /// <summary>
@@ -75,12 +83,16 @@ internal class PlategaHttpClient {
     public async Task<TResponse> GetAsync<TResponse>(
         string path,
         Dictionary<string, string> queryParams,
-        CancellationToken cancellationToken = default) {
+        CancellationToken cancellationToken = default
+    ) {
         var queryString = string.Join("&", queryParams.Select(p => $"{Uri.EscapeDataString(p.Key)}={Uri.EscapeDataString(p.Value)}"));
         var fullPath = string.IsNullOrEmpty(queryString) ? path : $"{path}?{queryString}";
 
         var request = CreateRequest(HttpMethod.Get, fullPath);
-        return await SendRequestAsync<TResponse>(request, cancellationToken).ConfigureAwait(false);
+        return await SendRequestAsync<TResponse>(
+            request,
+            cancellationToken
+        ).ConfigureAwait(false);
     }
 
     /// <summary>
@@ -95,13 +107,17 @@ internal class PlategaHttpClient {
     public async Task<TResponse> PostAsync<TRequest, TResponse>(
         string path,
         TRequest requestBody,
-        CancellationToken cancellationToken = default) {
+        CancellationToken cancellationToken = default
+    ) {
         var request = CreateRequest(HttpMethod.Post, path);
 
         var jsonContent = JsonSerializer.Serialize(requestBody, JsonOptions);
         request.Content = new StringContent(jsonContent, Encoding.UTF8, "application/json");
 
-        return await SendRequestAsync<TResponse>(request, cancellationToken).ConfigureAwait(false);
+        return await SendRequestAsync<TResponse>(
+            request,
+            cancellationToken
+        ).ConfigureAwait(false);
     }
 
     /// <summary>

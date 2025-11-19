@@ -19,7 +19,11 @@ public class PlategaClient : IPlategaClient {
     /// <param name="httpClient">Configured HTTP client.</param>
     /// <param name="merchantId">Merchant identifier.</param>
     /// <param name="secret">API secret key.</param>
-    public PlategaClient(HttpClient httpClient, string merchantId, string secret) {
+    public PlategaClient(
+        HttpClient httpClient,
+        string merchantId,
+        string secret
+    ) {
         if (httpClient == null) {
             throw new ArgumentNullException(nameof(httpClient));
         }
@@ -39,7 +43,8 @@ public class PlategaClient : IPlategaClient {
     /// <inheritdoc />
     public async Task<CreateTransactionResponse> CreateTransactionAsync(
         CreateTransactionRequest request,
-        CancellationToken cancellationToken = default) {
+        CancellationToken cancellationToken = default
+    ) {
         if (request == null) {
             throw new ArgumentNullException(nameof(request));
         }
@@ -47,26 +52,30 @@ public class PlategaClient : IPlategaClient {
         return await httpClient.PostAsync<CreateTransactionRequest, CreateTransactionResponse>(
             "transaction/process",
             request,
-            cancellationToken).ConfigureAwait(false);
+            cancellationToken
+        ).ConfigureAwait(false);
     }
 
     /// <inheritdoc />
     public async Task<TransactionStatusResponse> GetTransactionStatusAsync(
         Guid transactionId,
-        CancellationToken cancellationToken = default) {
+        CancellationToken cancellationToken = default
+    ) {
         if (transactionId == Guid.Empty) {
             throw new ArgumentException("Transaction ID cannot be empty.", nameof(transactionId));
         }
 
         return await httpClient.GetAsync<TransactionStatusResponse>(
             $"transaction/{transactionId}",
-            cancellationToken).ConfigureAwait(false);
+            cancellationToken
+        ).ConfigureAwait(false);
     }
 
     /// <inheritdoc />
     public async Task<RateResponse> GetRateAsync(
         GetRateRequest request,
-        CancellationToken cancellationToken = default) {
+        CancellationToken cancellationToken = default
+    ) {
         if (request == null) {
             throw new ArgumentNullException(nameof(request));
         }
@@ -89,13 +98,15 @@ public class PlategaClient : IPlategaClient {
         return await httpClient.GetAsync<RateResponse>(
             "rates/payment_method_rate",
             queryParams,
-            cancellationToken).ConfigureAwait(false);
+            cancellationToken
+        ).ConfigureAwait(false);
     }
 
     /// <inheritdoc />
     public async Task<ConversionsResponse> GetConversionsAsync(
         GetConversionsRequest request,
-        CancellationToken cancellationToken = default) {
+        CancellationToken cancellationToken = default
+    ) {
         if (request == null) {
             throw new ArgumentNullException(nameof(request));
         }
@@ -110,6 +121,7 @@ public class PlategaClient : IPlategaClient {
         return await httpClient.GetAsync<ConversionsResponse>(
             "transaction/balance-unlock-operations",
             queryParams,
-            cancellationToken).ConfigureAwait(false);
+            cancellationToken
+        ).ConfigureAwait(false);
     }
 }
