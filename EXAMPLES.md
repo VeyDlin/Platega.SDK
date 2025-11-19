@@ -5,6 +5,7 @@ This file contains practical examples of using the Platega.SDK SDK.
 ## Table of Contents
 
 - [ASP.NET Core Integration](#aspnet-core-integration)
+- [Multi-tenant Factory Pattern](#multi-tenant-factory-pattern)
 - [Console Application](#console-application)
 - [Creating Payments](#creating-payments)
 - [Handling Webhooks](#handling-webhooks)
@@ -192,6 +193,176 @@ public record CreatePaymentDto(
     string SuccessUrl,
     string FailUrl
 );
+```
+
+## Multi-tenant Factory Pattern
+
+For SaaS applications where each user configures their own Platega credentials.
+
+### ASP.NET Core with Factory
+
+```csharp
+// Program.cs
+using Platega.SDK.Extensions;
+
+var builder = WebApplication.CreateBuilder(args);
+
+// Register factory for dynamic credentials
+builder.Services.AddPlategaClientFactory();
+
+builder.Services.AddDbContext<AppDbContext>();
+builder.Services.AddControllers();
+var app = builder.Build();
+app.MapControllers();
+app.Run();
+```
+
+### Multi-tenant Payment Controller
+
+```csharp
+using Platega.SDK.Client;
+using Platega.SDK.Exceptions;
+using Platega.SDK.Models.Requests;
+using Platega.SDK.Models.Enums;
+using Microsoft.AspNetCore.Mvc;
+
+[ApiController]
+[Route("api/[controller]")]
+public class MultiTenantPaymentController : ControllerBase {
+    private readonly IPlategaClientFactory factory;
+    private readonly AppDbContext db;
+    private readonly ILogger<MultiTenantPaymentController> logger;
+
+    public MultiTenantPaymentController(
+        IPlategaClientFactory factory,
+        AppDbContext db,
+        ILogger<MultiTenantPaymentController> logger
+    ) {
+        this.factory = factory;
+        this.db = db;
+        this.logger = logger;
+    }
+
+    [HttpPost("create")]
+    public async Task<IActionResult> CreatePayment([FromBody] CreatePaymentDto dto) {
+        // Get current user's settings
+        var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+        var userSettings = await db.UserSettings
+            .FirstOrDefaultAsync(s => s.UserId == userId);
+
+        if (userSettings == null || string.IsNullOrEmpty(userSettings.PlategaMerchantId)) {
+            return BadRequest(new { error = "Platega not configured. Please add your credentials in settings." });
+        }
+
+        try {
+            // Create client with user's credentials
+            var client = factory.CreateClient(
+                userSettings.PlategaMerchantId,
+                userSettings.PlategaSecret
+            );
+
+            var response = await client.CreateTransactionAsync(new CreateTransactionRequest {
+                PaymentMethod = PaymentMethod.SbpQr,
+                PaymentDetails = new PaymentDetails {
+                    Amount = dto.Amount,
+                    Currency = "RUB"
+                },
+                Description = dto.Description,
+                ReturnUrl = dto.SuccessUrl,
+                FailedUrl = dto.FailUrl,
+                Payload = $"userId:{userId}"
+            });
+
+            // Log for user's transaction history
+            await db.Transactions.AddAsync(new Transaction {
+                UserId = userId,
+                TransactionId = response.TransactionId,
+                Amount = dto.Amount,
+                Status = "pending",
+                CreatedAt = DateTime.UtcNow
+            });
+            await db.SaveChangesAsync();
+
+            return Ok(new {
+                success = true,
+                paymentUrl = response.Redirect,
+                transactionId = response.TransactionId
+            });
+        } catch (PlategaAuthenticationException) {
+            logger.LogWarning("Invalid credentials for user {UserId}", userId);
+            return BadRequest(new { error = "Invalid Platega credentials. Please check your settings." });
+        } catch (PlategaApiException ex) {
+            logger.LogError(ex, "Platega API error for user {UserId}", userId);
+            return StatusCode(500, new { error = "Payment service error" });
+        }
+    }
+
+    [HttpGet("rate")]
+    public async Task<IActionResult> GetRate([FromQuery] string from, [FromQuery] string to) {
+        var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+        var userSettings = await db.UserSettings
+            .FirstOrDefaultAsync(s => s.UserId == userId);
+
+        if (userSettings == null || string.IsNullOrEmpty(userSettings.PlategaMerchantId)) {
+            return BadRequest(new { error = "Platega not configured" });
+        }
+
+        var client = factory.CreateClient(
+            userSettings.PlategaMerchantId,
+            userSettings.PlategaSecret
+        );
+
+        var rate = await client.GetRateAsync(new GetRateRequest {
+            PaymentMethod = PaymentMethod.SbpQr,
+            CurrencyFrom = from,
+            CurrencyTo = to
+        });
+
+        return Ok(new {
+            rate = rate.Rate,
+            updatedAt = rate.UpdatedAt
+        });
+    }
+}
+```
+
+### Standalone Factory Usage
+
+```csharp
+using Platega.SDK.Client;
+using Platega.SDK.Models.Requests;
+using Platega.SDK.Models.Enums;
+
+class Program {
+    static async Task Main(string[] args) {
+        // Create factory (remember to dispose when done)
+        using var factory = new PlategaClientFactory();
+
+        // Simulate multiple merchants
+        var merchants = new[] {
+            ("Merchant 1", "merchant-id-1", "secret-1"),
+            ("Merchant 2", "merchant-id-2", "secret-2")
+        };
+
+        foreach (var (name, merchantId, secret) in merchants) {
+            Console.WriteLine($"\nProcessing {name}...");
+
+            // Create client for this merchant
+            var client = factory.CreateClient(merchantId, secret);
+
+            try {
+                var rate = await client.GetRateAsync(new GetRateRequest {
+                    PaymentMethod = PaymentMethod.SbpQr,
+                    CurrencyFrom = "RUB",
+                    CurrencyTo = "USDT"
+                });
+                Console.WriteLine($"  Rate: {rate.Rate}");
+            } catch (PlategaAuthenticationException) {
+                Console.WriteLine($"  Invalid credentials");
+            }
+        }
+    }
+}
 ```
 
 ## Console Application

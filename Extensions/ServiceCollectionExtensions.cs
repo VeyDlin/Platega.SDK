@@ -83,4 +83,30 @@ public static class ServiceCollectionExtensions {
 
         return services;
     }
+
+    /// <summary>
+    /// Adds Platega client factory to the service collection.
+    /// Use this for multi-tenant scenarios where credentials are retrieved dynamically.
+    /// </summary>
+    /// <param name="services">Service collection.</param>
+    /// <returns>Service collection for chaining.</returns>
+    public static IServiceCollection AddPlategaClientFactory(
+        this IServiceCollection services
+    ) {
+        if (services == null) {
+            throw new ArgumentNullException(nameof(services));
+        }
+
+        services.AddHttpClient(
+            PlategaClientFactory.GetHttpClientName(),
+            client => {
+                client.BaseAddress = new Uri(PlategaClientFactory.GetBaseApiUrl());
+                client.Timeout = TimeSpan.FromSeconds(30);
+            }
+        );
+
+        services.AddSingleton<IPlategaClientFactory, PlategaClientFactory>();
+
+        return services;
+    }
 }

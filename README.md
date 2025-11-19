@@ -253,6 +253,79 @@ builder.Services.AddPlategaClient("MERCHANT_ID", "SECRET", client => {
 
 The SDK automatically uses `IHttpClientFactory` when registered via extension methods, ensuring proper HttpClient lifecycle management.
 
+### Multi-tenant Scenarios (Factory Pattern)
+
+For SaaS applications where each user has their own Platega credentials:
+
+```csharp
+// Program.cs
+builder.Services.AddPlategaClientFactory();
+```
+
+```csharp
+// Controller
+[ApiController]
+[Route("api/[controller]")]
+public class PaymentController : ControllerBase {
+    private readonly IPlategaClientFactory factory;
+    private readonly AppDbContext db;
+
+    public PaymentController(
+        IPlategaClientFactory factory,
+        AppDbContext db
+    ) {
+        this.factory = factory;
+        this.db = db;
+    }
+
+    [HttpPost("create")]
+    public async Task<IActionResult> CreatePayment([FromBody] CreatePaymentDto dto) {
+        // Get user's credentials from database
+        var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+        var userSettings = await db.UserSettings.FindAsync(userId);
+
+        if (string.IsNullOrEmpty(userSettings?.PlategaMerchantId)) {
+            return BadRequest("Platega not configured");
+        }
+
+        // Create client with user's credentials
+        var client = factory.CreateClient(
+            userSettings.PlategaMerchantId,
+            userSettings.PlategaSecret
+        );
+
+        var response = await client.CreateTransactionAsync(new CreateTransactionRequest {
+            PaymentMethod = PaymentMethod.SbpQr,
+            PaymentDetails = new PaymentDetails {
+                Amount = dto.Amount,
+                Currency = "RUB"
+            },
+            Description = dto.Description,
+            ReturnUrl = dto.SuccessUrl
+        });
+
+        return Ok(new { PaymentUrl = response.Redirect });
+    }
+}
+```
+
+#### Standalone Factory Usage (Console Apps)
+
+```csharp
+using Platega.SDK.Client;
+
+// Create factory (remember to dispose)
+using var factory = new PlategaClientFactory();
+
+// Create clients for different merchants
+var client1 = factory.CreateClient("merchant-1", "secret-1");
+var client2 = factory.CreateClient("merchant-2", "secret-2");
+
+// Use clients
+var rate1 = await client1.GetRateAsync(new GetRateRequest { ... });
+var rate2 = await client2.GetRateAsync(new GetRateRequest { ... });
+```
+
 ## Documentation
 
 - [Official Platega.io API Documentation](https://docs.platega.io/)
