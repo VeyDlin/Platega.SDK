@@ -14,8 +14,7 @@ internal class PlategaHttpClient {
     private readonly string merchantId;
     private readonly string secret;
     private static readonly JsonSerializerOptions JsonOptions = new() {
-        PropertyNameCaseInsensitive = true,
-        Converters = { new JsonStringEnumConverter() }
+        PropertyNameCaseInsensitive = true
     };
 
     /// <summary>

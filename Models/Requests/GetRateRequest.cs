@@ -9,15 +9,15 @@ public class GetRateRequest {
     /// <summary>
     /// Payment method identifier.
     /// </summary>
-    public PaymentMethod PaymentMethod { get; set; }
+    public required PaymentMethod PaymentMethod { get; set; }
 
     /// <summary>
     /// Source currency (e.g., RUB).
     /// </summary>
-    public string CurrencyFrom { get; set; } = "RUB";
+    public required string CurrencyFrom { get; set; }
 
     /// <summary>
     /// Target currency (e.g., USDT).
     /// </summary>
-    public string CurrencyTo { get; set; } = "USDT";
+    public required string CurrencyTo { get; set; }
 }

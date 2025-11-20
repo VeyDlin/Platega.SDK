@@ -12,31 +12,31 @@ public class CreateTransactionRequest {
     /// </summary>
     /// <example>2</example>
     [JsonPropertyName("paymentMethod")]
-    public PaymentMethod PaymentMethod { get; set; }
+    public required PaymentMethod PaymentMethod { get; set; }
 
     /// <summary>
     /// Payment details including amount and currency.
     /// </summary>
     [JsonPropertyName("paymentDetails")]
-    public PaymentDetails PaymentDetails { get; set; } = new();
+    public required PaymentDetails PaymentDetails { get; set; }
 
     /// <summary>
-    /// Payment description/purpose. Always provide when possible.
+    /// Payment description/purpose.
     /// </summary>
     [JsonPropertyName("description")]
-    public string Description { get; set; } = string.Empty;
+    public required string Description { get; set; }
 
     /// <summary>
     /// Redirect URL after successful payment.
     /// </summary>
     [JsonPropertyName("return")]
-    public string ReturnUrl { get; set; } = string.Empty;
+    public required string ReturnUrl { get; set; }
 
     /// <summary>
-    /// Redirect URL after failed payment (optional).
+    /// Redirect URL after failed payment.
     /// </summary>
     [JsonPropertyName("failedUrl")]
-    public string? FailedUrl { get; set; }
+    public required string FailedUrl { get; set; }
 
     /// <summary>
     /// Additional information for initialization in your system (optional).
@@ -53,11 +53,11 @@ public class PaymentDetails {
     /// Payment amount.
     /// </summary>
     [JsonPropertyName("amount")]
-    public decimal Amount { get; set; }
+    public required decimal Amount { get; set; }
 
     /// <summary>
     /// Payment currency (e.g., RUB).
     /// </summary>
     [JsonPropertyName("currency")]
-    public string Currency { get; set; } = "RUB";
+    public required string Currency { get; set; }
 }

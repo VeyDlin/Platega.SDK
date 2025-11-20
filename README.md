@@ -98,7 +98,8 @@ var response = await client.CreateTransactionAsync(new CreateTransactionRequest 
         Currency = "RUB"
     },
     Description = "Test payment",
-    ReturnUrl = "https://example.com/success"
+    ReturnUrl = "https://example.com/success",
+    FailedUrl = "https://example.com/fail"
 });
 
 Console.WriteLine($"Payment URL: {response.Redirect}");
@@ -113,15 +114,15 @@ Console.WriteLine($"Transaction ID: {response.TransactionId}");
 
 ```csharp
 var response = await client.CreateTransactionAsync(new CreateTransactionRequest {
-    PaymentMethod = PaymentMethod.SbpQr,    // Required: 2=SBP QR, 10=Cards RUB, etc.
+    PaymentMethod = PaymentMethod.SbpQr,    	// Required: 2=SBP QR, 10=Cards RUB, etc.
     PaymentDetails = new PaymentDetails {
-        Amount = 500.00m,                    // Required: Payment amount
-        Currency = "RUB"                     // Required: Currency code
+        Amount = 500.00m,                    	// Required: Payment amount
+        Currency = "RUB"                     	// Required: Currency code
     },
-    Description = "Order payment",           // Required: Payment description
-    ReturnUrl = "https://...",              // Required: Success redirect URL
-    FailedUrl = "https://...",              // Optional: Failure redirect URL
-    Payload = "custom-data"                 // Optional: Custom data for webhook
+    Description = "Order payment",           	// Required: Payment description
+    ReturnUrl = "https://...",              	// Required: Success redirect URL
+    FailedUrl = "https://...",              	// Required: Failure redirect URL
+    Payload = "custom-data"                 	// Optional: Custom data for webhook
 });
 
 // Response contains:

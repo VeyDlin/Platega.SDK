@@ -391,7 +391,8 @@ class Program {
                     Currency = "RUB"
                 },
                 Description = "Test payment from console app",
-                ReturnUrl = "https://example.com/success"
+                ReturnUrl = "https://example.com/success",
+                FailedUrl = "https://example.com/fail"
             });
 
             Console.WriteLine($"Payment created!");
@@ -423,7 +424,8 @@ var response = await client.CreateTransactionAsync(new CreateTransactionRequest 
         Currency = "RUB"
     },
     Description = "Order #12345",
-    ReturnUrl = "https://myapp.com/success"
+    ReturnUrl = "https://myapp.com/success",
+    FailedUrl = "https://myapp.com/fail"
 });
 ```
 
@@ -461,7 +463,8 @@ var response = await client.CreateTransactionAsync(new CreateTransactionRequest 
         Currency = "USD"
     },
     Description = "Digital product purchase",
-    ReturnUrl = "https://myapp.com/success"
+    ReturnUrl = "https://myapp.com/success",
+    FailedUrl = "https://myapp.com/fail"
 });
 ```
 
@@ -478,7 +481,8 @@ var response = await client.CreateTransactionAsync(new CreateTransactionRequest 
         Currency = "USDT"
     },
     Description = "Crypto payment",
-    ReturnUrl = "https://myapp.com/success"
+    ReturnUrl = "https://myapp.com/success",
+    FailedUrl = "https://myapp.com/fail"
 });
 ```
 
